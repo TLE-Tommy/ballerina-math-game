@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ballerina Spin Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #fce4ec;
+      overflow: hidden;
+    }
+    img.ballerina {
+      width: 150px;
+      height: auto;
+      margin: 20px auto;
+      display: block;
+      animation: none;
+      transform-origin: center center;
+    }
+    @keyframes spin3D {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    #message {
+      font-size: 20px;
+      color: #d81b60;
+    }
+    .firework {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: red;
+      border-radius: 50%;
+      animation: explode 1s ease-out forwards;
+    }
+    @keyframes explode {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--x), var(--y)) scale(0.5); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎀 Spin with the Ballerina! 🎀</h1>
+  <p>Solve the math question and watch the ballerina spin!</p>
+
+  <div id="question"></div>
+  <input type="number" id="answer" />
+  <button onclick="checkAnswer()">Submit</button>
+
+  <img id="ballerina" class="ballerina" src="ballerina.png" alt="Ballerina Image" />
+
+  <div id="message"></div>
+
+  <script>
+    let currentAnswer = 0;
+
+    function generateQuestion() {
+      const twoDigit = Math.floor(Math.random() * 90) + 10; // 10–99
+      const oneDigit = Math.floor(Math.random() * 9) + 1;    // 1–9
+      const isAddition = Math.random() < 0.7; // 70% chance for addition
+      if (isAddition) {
+        currentAnswer = twoDigit + oneDigit;
+        question.textContent = `What is ${twoDigit} + ${oneDigit}?`;
+      } else {
+        const max = Math.max(twoDigit, oneDigit);
+        const min = Math.min(twoDigit, oneDigit);
+        currentAnswer = max - min;
+        question.textContent = `What is ${max} - ${min}?`;
+      }
+      answer.value = '';
+      message.textContent = '';
+      ballerina.style.animation = 'none';
+    }
+
+    function checkAnswer() {
+      const userAnswer = parseInt(answer.value);
+      if (userAnswer === currentAnswer) {
+        const ballerina = document.getElementById('ballerina');
+        const spinCount = Math.floor(currentAnswer / 10);
+        ballerina.style.animation = `spin3D 0.5s linear ${spinCount}`;
+        message.textContent = `Bravo! The ballerina spun ${spinCount} times!`;
+        setTimeout(() => {
+          showFireworks();
+          generateQuestion();
+        }, spinCount * 500 + 500);
+      } else {
+        message.textContent = 'Oops! Try again!';
+      }
+    }
+
+    function showFireworks() {
+      for (let i = 0; i < 30; i++) {
+        const fw = document.createElement('div');
+        fw.className = 'firework';
+        fw.style.left = `${window.innerWidth / 2}px`;
+        fw.style.top = `${window.innerHeight / 2}px`;
+        const angle = Math.random() * 2 * Math.PI;
+        const radius = Math.random() * 150 + 50;
+        fw.style.setProperty('--x', `${Math.cos(angle) * radius}px`);
+        fw.style.setProperty('--y', `${Math.sin(angle) * radius}px`);
+        document.body.appendChild(fw);
+        setTimeout(() => fw.remove(), 1000);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("answer").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          checkAnswer();
+        }
+      });
+      generateQuestion();
+    });
+  </script>
+</body>
+</html>
